@@ -11,6 +11,7 @@ pub enum HashAlgorithm {
     Sha256,
     Sha512,
     Bcrypt,
+    Ntlm,
 }
 
 impl HashAlgorithm {
@@ -21,6 +22,7 @@ impl HashAlgorithm {
             "sha256" => Some(Self::Sha256),
             "sha512" => Some(Self::Sha512),
             "bcrypt" => Some(Self::Bcrypt),
+            "ntlm" => Some(Self::Ntlm),
             _ => None,
         }
     }
@@ -34,6 +36,7 @@ impl fmt::Display for HashAlgorithm {
             Self::Sha256 => write!(f, "SHA256"),
             Self::Sha512 => write!(f, "SHA512"),
             Self::Bcrypt => write!(f, "bcrypt"),
+            Self::Ntlm => write!(f, "NTLM"),
         }
     }
 }

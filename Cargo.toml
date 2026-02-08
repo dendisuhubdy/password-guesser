@@ -8,6 +8,7 @@ description = "Smart password guesser for educational cybersecurity research"
 clap = { version = "4", features = ["derive"] }
 serde = { version = "1", features = ["derive"] }
 toml = "0.8"
+md4 = "0.10"
 md-5 = "0.10"
 sha1 = "0.10"
 sha2 = "0.10"

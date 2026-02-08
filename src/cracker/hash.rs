@@ -173,9 +173,27 @@ fn compute_hash(algo: HashAlgorithm, input: &str) -> String {
             hasher.update(input.as_bytes());
             hex::encode(hasher.finalize())
         }
+        HashAlgorithm::Ntlm => {
+            let utf16le: Vec<u8> = input.encode_utf16().flat_map(|c| c.to_le_bytes()).collect();
+            let mut hasher = md4::Md4::new();
+            hasher.update(&utf16le);
+            hex::encode(hasher.finalize())
+        }
         HashAlgorithm::Bcrypt => {
             // bcrypt doesn't produce a hex hash for comparison
             unreachable!("bcrypt uses verify, not hash comparison")
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_ntlm_hash() {
+        // Well-known NTLM test vector: "password" -> a4f49c406510bdcab6824ee7c30fd852
+        let result = compute_hash(HashAlgorithm::Ntlm, "password");
+        assert_eq!(result, "8846f7eaee8fb117ad06bdd830b7586c");
     }
 }

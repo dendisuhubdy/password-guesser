@@ -58,7 +58,7 @@ enum Commands {
         #[arg(long)]
         hash_file: Option<PathBuf>,
 
-        /// Hash algorithm (md5, sha1, sha256, sha512, bcrypt)
+        /// Hash algorithm (md5, sha1, sha256, sha512, bcrypt, ntlm)
         #[arg(short, long)]
         algo: String,
 
@@ -210,7 +210,7 @@ fn cmd_crack_hash(
     let algo = match algo {
         Some(a) => a,
         None => bail!(
-            "Unknown algorithm: {}. Supported: md5, sha1, sha256, sha512, bcrypt",
+            "Unknown algorithm: {}. Supported: md5, sha1, sha256, sha512, bcrypt, ntlm",
             algo_str
         ),
     };

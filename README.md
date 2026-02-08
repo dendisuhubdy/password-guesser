@@ -8,7 +8,7 @@ Smart, profile-driven password guesser for **educational cybersecurity research*
 
 - **Profile-based generation** — Build password candidates from personal info, interests, network details, and custom words defined in a TOML profile
 - **Mutation engine** — Automatically applies case variations, leet speak, reversals, word combinations, numeric/symbol suffixes, and common prefixes
-- **Hash cracking** — Crack MD5, SHA1, SHA256, SHA512, and bcrypt hashes
+- **Hash cracking** — Crack MD5, SHA1, SHA256, SHA512, bcrypt, and NTLM hashes
 - **WiFi cracking** — Crack WPA/WPA2 handshakes via aircrack-ng or hashcat
 - **Tiered depth control** — Three generation depths: fast (~5K candidates), medium (~20-50K), deep (~100-500K)
 - **Parallel processing** — Uses rayon for multi-threaded hash cracking
@@ -90,7 +90,7 @@ password-guesser crack-hash \
   --depth 3
 ```
 
-Supported algorithms: `md5`, `sha1`, `sha256`, `sha512`, `bcrypt`
+Supported algorithms: `md5`, `sha1`, `sha256`, `sha512`, `bcrypt`, `ntlm`
 
 ### 4. Capture a WiFi handshake
 
@@ -247,13 +247,13 @@ e99a18c428cb38d5f260853678922e03
 
 **Step 8 — Crack with password-guesser:**
 
-NTLM hashes use the MD4 algorithm, but are commonly represented as straight hex digests similar to MD5. For NTLM hashes dumped via Mimikatz, use the MD5 or SHA1 algorithm matching the hash type shown in the Mimikatz output:
+NTLM hashes use the MD4(UTF-16LE(password)) algorithm. Use `--algo ntlm` to crack them:
 
 ```sh
 # Crack NTLM hashes (32-char hex from sekurlsa::logonpasswords)
 password-guesser crack-hash \
   --hash-file ntlm_hashes.txt \
-  --algo md5 \
+  --algo ntlm \
   --profile target_profile.toml \
   --depth 3
 
@@ -297,7 +297,7 @@ src/
 ├── wordlist.rs      # Wordlist file I/O
 └── cracker/
     ├── mod.rs       # Hash algorithm types and crack result
-    ├── hash.rs      # Parallel hash cracking (MD5/SHA/bcrypt)
+    ├── hash.rs      # Parallel hash cracking (MD5/SHA/bcrypt/NTLM)
     └── wifi.rs      # WiFi cracking via aircrack-ng/hashcat
 ```
 
