@@ -1,0 +1,28 @@
+# Example target profile for password-guesser
+# Fill in known information about the target for smarter guesses
+
+[personal]
+first_name = "John"
+last_name = "Smith"
+nickname = "Johnny"
+birthdate = "1990-05-15"      # YYYY-MM-DD
+partner_name = "Jane"
+pet_name = "Buddy"
+children_names = ["Emma", "Liam"]
+phone = "+1-555-867-5309"
+
+[network]
+ssid = "SmithFamily"
+router_brand = "Netgear"
+isp = "Comcast"
+
+[interests]
+favorite_team = "Lakers"
+favorite_band = "Metallica"
+hobbies = ["fishing", "gaming", "guitar"]
+favorite_color = "blue"
+favorite_number = "7"
+
+[custom]
+words = ["mustang", "texas"]
+numbers = ["1234", "42"]

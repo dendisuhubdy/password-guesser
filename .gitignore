@@ -1,0 +1,5 @@
+/target
+*.cap
+*.hccapx
+*.pcap
+test_wordlist.txt
